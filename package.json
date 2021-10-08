@@ -1,0 +1,23 @@
+{
+	"name": "ISRO",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"server": "npm run watch --prefix Server",
+		"client": "npm start --prefix Client",
+		"watch": "npm run server & npm run client"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/gsakshay/ISRO.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/gsakshay/ISRO/issues"
+	},
+	"homepage": "https://github.com/gsakshay/ISRO#readme"
+}
