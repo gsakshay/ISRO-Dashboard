@@ -1,14 +1,14 @@
 /** @format */
 
 const {
-	launches,
+	getAllLaunches,
 	addNewLaunch,
 	deleteLaunch,
 	existsLaunchWithFlightNumber,
 } = require("../../models/launches.model")
 
-function getAllLaunches(req, res) {
-	return res.status(200).json(Array.from(launches.values()))
+async function httpGetAllLaunches(req, res) {
+	return res.status(200).json(await getAllLaunches())
 }
 
 function httpAddNewLaunch(req, res) {
@@ -23,21 +23,25 @@ function httpAddNewLaunch(req, res) {
 	return res.status(201).json(launch)
 }
 
-function httpDeleteLaunch(req, res) {
+async function httpDeleteLaunch(req, res) {
 	const { flightNumber } = req.params
 
-	if (!existsLaunchWithFlightNumber(Number(flightNumber))) {
+	const existsLaunch = await existsLaunchWithFlightNumber(Number(flightNumber))
+	if (!existsLaunch) {
 		return res.status(404).json({
 			error: "Launch not present",
 		})
 	}
 
-	const aborted = deleteLaunch(Number(flightNumber))
+	const aborted = await deleteLaunch(Number(flightNumber))
+
+	if (!aborted) return res.status(400).json("Could not delet")
+
 	return res.status(200).json(aborted)
 }
 
 module.exports = {
-	getAllLaunches,
+	httpGetAllLaunches,
 	httpAddNewLaunch,
 	httpDeleteLaunch,
 }

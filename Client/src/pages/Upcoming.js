@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useMemo } from "react"
+import React, { useMemo, useEffect } from "react"
 import { withStyles, Appear, Link, Paragraph, Table, Words } from "arwes"
 
 import Clickable from "../components/Clickable"

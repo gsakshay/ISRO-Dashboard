@@ -9,6 +9,8 @@ function useLaunches(onSuccessSound, onAbortSound, onFailureSound) {
 	const [launches, saveLaunches] = useState([])
 	const [isPendingLaunch, setPendingLaunch] = useState(false)
 
+	console.log("See the launches here", launches)
+
 	const getLaunches = useCallback(async () => {
 		const fetchedLaunches = await httpGetLaunches()
 		saveLaunches(fetchedLaunches)
@@ -16,7 +18,7 @@ function useLaunches(onSuccessSound, onAbortSound, onFailureSound) {
 
 	useEffect(() => {
 		getLaunches()
-	}, [getLaunches])
+	}, [])
 
 	const submitLaunch = useCallback(
 		async (e) => {
@@ -40,6 +42,7 @@ function useLaunches(onSuccessSound, onAbortSound, onFailureSound) {
 				setTimeout(() => {
 					setPendingLaunch(false)
 					onSuccessSound()
+					getLaunches()
 				}, 800)
 			} else {
 				onFailureSound()
@@ -47,6 +50,10 @@ function useLaunches(onSuccessSound, onAbortSound, onFailureSound) {
 		},
 		[getLaunches, onSuccessSound, onFailureSound]
 	)
+
+	// useEffect(() => {
+	// 	getLaunches()
+	// }, [submitLaunch])
 
 	const abortLaunch = useCallback(
 		async (id) => {
