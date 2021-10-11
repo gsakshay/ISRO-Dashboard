@@ -2,12 +2,14 @@
 
 const http = require("http")
 const mongoose = require("mongoose")
+require("dotenv").config()
 
 const app = require("./src/app")
 const { loadPlanetsData } = require("./src/models/planets.model")
+const { loadSpaceXLaunches } = require("./src/models/launches.model")
 
 const PORT = process.env.PORT || 5000
-const MONGO_URL = `mongodb+srv://admin-akshay:${8050272014}@dashboard.vxjhd.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
+const MONGO_URL = process.env.MONGO_URL
 
 const server = http.createServer(app)
 
@@ -25,6 +27,7 @@ async function startServer() {
 		useUnifiedTopology: true,
 	})
 	await loadPlanetsData()
+	await loadSpaceXLaunches()
 	server.listen(PORT, () => console.log(`Server is listening on ${PORT}`))
 }
 

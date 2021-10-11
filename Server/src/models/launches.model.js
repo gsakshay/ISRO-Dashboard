@@ -3,7 +3,88 @@
 const launches = require("./launches.mongo")
 const planets = require("./planets.mongo")
 
+const axios = require("axios")
+
 let DEFAULT_FLIGHT_NUMBER = 888
+const SPACE_X_URL = "https://api.spacexdata.com/v4/launches/query"
+
+// flight_number
+// rocket.name
+// name = mission name
+// date_local = launch
+// upcoming
+// success
+// customers = playload.customers for each playload
+
+async function findLaunch(filter) {
+	return await launches.findOne(filter)
+}
+
+async function saveLaunch(launch) {
+	await launches.findOneAndUpdate(
+		{
+			flightNumber: Number(launch.flightNumber),
+		},
+
+		launch,
+
+		{
+			upsert: true,
+		}
+	)
+}
+
+async function loadSpaceXLaunches() {
+	const response = await axios.post(SPACE_X_URL, {
+		query: {},
+		options: {
+			pagination: false,
+			populate: [
+				{
+					path: "rocket",
+					select: {
+						name: 1,
+					},
+				},
+				{
+					path: "payloads",
+					select: {
+						customers: 1,
+					},
+				},
+			],
+		},
+	})
+
+	if (response.status !== 200) {
+		console.log("There was a problem in downloading data")
+		throw new Error("Launch data download failed")
+	}
+
+	const launchDocs = response.data.docs
+	for (const launchDoc of launchDocs) {
+		const payloads = launchDoc["payloads"]
+		const customersArray = payloads.map((payload) => payload.customers)
+		const customers = customersArray.flat()
+		const launch = {
+			flightNumber: launchDoc["flight_number"],
+			mission: launchDoc["name"],
+			rocket: launchDoc["rocket"]["name"],
+			launchDate: launchDoc["date_local"],
+			upcoming: launchDoc["upcoming"],
+			success: launchDoc["success"],
+			customers,
+		}
+		const firstLaunch = await findLaunch({
+			flightNumber: launch.flightNumber,
+		})
+		if (firstLaunch) {
+			console.log(`${firstLaunch.mission} is already available`)
+		} else {
+			await saveLaunch(launch)
+		}
+	}
+}
 
 async function saveNewLaunch(launch) {
 	const planet = await planets.findOne({
@@ -14,19 +95,9 @@ async function saveNewLaunch(launch) {
 
 	if (!planet) {
 		throw new Error("No matching planet found")
+	} else {
+		saveLaunch(launch)
 	}
-
-	await launches.updateOne(
-		{
-			flightNumber: launch.flightNumber,
-		},
-
-		launch,
-
-		{
-			upsert: true,
-		}
-	)
 }
 
 async function addNewLaunch(launch) {
@@ -54,17 +125,19 @@ async function getLatestFlightNumber() {
 }
 
 async function getAllLaunches() {
-	return await launches.find(
-		{},
-		{
-			_id: 0,
-			__v: 0,
-		}
-	)
+	return await launches
+		.find(
+			{},
+			{
+				_id: 0,
+				__v: 0,
+			}
+		)
+		.sort({ flightNumber: 1 })
 }
 
 async function existsLaunchWithFlightNumber(flightNumber) {
-	return await launches.findOne({
+	return await findLaunch({
 		flightNumber,
 	})
 }
@@ -83,6 +156,7 @@ async function deleteLaunch(flightNumber) {
 }
 
 module.exports = {
+	loadSpaceXLaunches,
 	getAllLaunches,
 	addNewLaunch,
 	deleteLaunch,
