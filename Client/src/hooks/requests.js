@@ -2,7 +2,7 @@
 
 import React from "react"
 
-const API_HOST = "http://localhost:5000"
+const API_HOST = ""
 
 // Load planets and return as JSON.
 async function httpGetPlanets() {

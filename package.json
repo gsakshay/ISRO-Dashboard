@@ -7,7 +7,11 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"server": "npm run watch --prefix Server",
 		"client": "npm start --prefix Client",
-		"watch": "npm run server & npm run client"
+		"install-server": "npm install --prefix Server",
+		"install-client": "npm install --prefix Client",
+		"install": "npm run install-server && npm run install-client",
+		"watch": "npm run server & npm run client",
+		"deploy": "npm start --prefix Server"
 	},
 	"repository": {
 		"type": "git",
